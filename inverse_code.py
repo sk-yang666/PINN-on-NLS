@@ -9,15 +9,12 @@ def gen_traindata():
     x_upper = 10
     t_lower = -2
     t_upper = 2
+
     x = np.linspace(x_lower, x_upper, 200)
     t = np.linspace(t_lower, t_upper, 200)
-    u1w=(1/2) * np.cos(1.5*x-(-0.587/2)) * np.exp(2.5-1.5*x) / np.cosh(1.5*x+(-0.587/2))
-    v1w=(1/2) * np.sin(1.5*x-(-0.587/2)) * np.exp(2.5-1.5*x) / np.cosh(1.5*x+(-0.587/2))
-    u2w=np.cos(1.5*x-(-0.587/2)) * np.exp(2.5-1.5*x) / np.cosh(1.5*x+(-0.587/2))
-    v2w=np.sin(1.5*x-(-0.587/2)) * np.exp(2.5-1.5*x) / np.cosh(1.5*x+(-0.587/2))
-    
-    x1 = np.linspace(x_lower, x_upper, 40000)
-    #t = np.linspace(t_lower, t_upper, 200)
+    X, T = np.meshgrid(x, t)
+    X = np.reshape(X, (-1, 1))
+    T = np.reshape(T, (-1, 1))
     a = 1
     b = 2
     k_r = 1.5
@@ -25,21 +22,18 @@ def gen_traindata():
     v1 = 1
     v2 = 1
     v3 = 1
-    c = math.log(a * a * v1 + b * b * v2 + a * b * v3 + a * b * v3) / ((2 * k_r) * (2 * k_r))
-    u1 = (a / 2) * np.exp(-c / 2) * np.cos(x + 1.25 * t) / np.cosh(1.5 * x - 3 * t + c / 2)
-    v1 = (a / 2) * np.exp(-c / 2) * np.sin(x + 1.25 * t) / np.cosh(1.5 * x - 3 * t + c / 2)
-    u2 = (b / 2) * np.exp(-c / 2) * np.cos(x + 1.25 * t) / np.cosh(1.5 * x - 3 * t + c / 2)
-    v2 = (b / 2) * np.exp(-c / 2) * np.sin(x + 1.25 * t) / np.cosh(1.5 * x - 3 * t + c / 2)
+    c = np.log(a * a * v1 + b * b * v2 + a * b * v3 + a * b * v3) / ((2 * k_r) * (2 * k_r))
+    u1 = (a / 2) * np.exp(-c / 2) * np.cos(X + 1.25 * T) / np.cosh(1.5 * X - 3 * T + c / 2)
+    v1 = (a / 2) * np.exp(-c / 2) * np.sin(X + 1.25 * T) / np.cosh(1.5 * X - 3 * T + c / 2)
+    u2 = (b / 2) * np.exp(-c / 2) * np.cos(X + 1.25 * T) / np.cosh(1.5 * X - 3 * T + c / 2)
+    v2 = (b / 2) * np.exp(-c / 2) * np.sin(X + 1.25 * T) / np.cosh(1.5 * X - 3 * T + c / 2)
 
 
-    X, T = np.meshgrid(x, t)
-    X = np.reshape(X, (-1, 1))
-    T = np.reshape(T, (-1, 1))
     U1=np.reshape(u1,(-1,1))
     V1=np.reshape(v1,(-1,1))
     U2=np.reshape(u2,(-1,1))
     V2=np.reshape(v2,(-1,1))
-    
+
     return np.hstack((X, T)), U1,V1,U2,V2
 
 
@@ -51,12 +45,12 @@ m2=dde.Variable(-1.0)
 m3=dde.Variable(0.0)
 
 def pde(x,y):
-    
+
     u1 = y[:, 0:1]
     v1 = y[:, 1:2]
     u2 = y[:, 2:3]
     v2 = y[:, 3:4]
-    
+
 
     # 在'jacobian'中，i 是输出分量，j 是输入分量
     u1_t = dde.grad.jacobian(y, x, i=0, j=1)
@@ -196,9 +190,9 @@ data = dde.data.TimePDE(
     pde,
     #[bc_a, bc_b, ic1, ic2, observe_y1, observe_y2],
     [bc_u1_0, bc_u1_1, bc_v1_0, bc_v1_1,bc_u2_0, bc_u2_1, bc_v2_0, bc_v2_1, ic_u1, ic_v1,ic_u2, ic_v2,observe_y1, observe_y2,observe_y3,observe_y4],
-    num_domain=200,
-    num_boundary=100,
-    num_initial=100,
+    num_domain=40000,
+    num_boundary=200,
+    num_initial=200,
     anchors=observe_x,
     num_test=50000,
 )
@@ -208,6 +202,6 @@ net = dde.nn.FNN([2] + [20] * 3 + [4], "sin", "Glorot uniform")
 
 model = dde.Model(data, net)
 model.compile("adam", lr=0.001, external_trainable_variables=[m0,m1,m2,m3])
-variable = dde.callbacks.VariableValue([m0,m1,m2,m3], period=50, filename="variables.dat")
-losshistory, train_state = model.train(iterations=800, callbacks=[variable])
+variable = dde.callbacks.VariableValue([m0,m1,m2,m3], period=1000, filename="variables.dat")
+losshistory, train_state = model.train(iterations=80000, callbacks=[variable])
 dde.saveplot(losshistory, train_state, issave=True, isplot=True)
