@@ -80,7 +80,7 @@ filet.write("\n".join(linest))
 filexx=open('data_x_x.csv', 'w')
 filexx.write("x,t,r1,r2,r3,r4\n")
 linesxx=[]
-for v in range(8000):
+for v in range(15000):
 
     x=20*random.random()-10
     t=4*random.random()-2
