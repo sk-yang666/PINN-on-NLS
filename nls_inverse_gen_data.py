@@ -2,23 +2,6 @@ import numpy as np
 from pyDOE import lhs
 import random
 
-k1=1.5
-k2=1
-l1=1.5
-l2=-1
-nf1=0
-nf2=0
-ng1=0
-ng2=0
-k=complex(k1,-k2)
-kk=k.conjugate()
-l=complex(l1,-l2)
-ll=l.conjugate()
-nf=complex(nf1,-nf2)
-nff=nf.conjugate()
-ng=complex(ng1,-ng2)
-ngg=ng.conjugate()
-
 n=200
 
 lines= []
@@ -100,7 +83,7 @@ for v in range(index):
     q1=4*v_1*1j*(lambda1.conjugate()-lambda1)*np.exp(3*xi1+xi1.conjugate()+eta1)*np.cosh(xi1+xi1.conjugate()+eta1)/(2*v_2*np.exp(3*(xi1+xi1.conjugate())+eta2)*np.cosh(xi1+xi1.conjugate()+eta2)+gamma1)
     q2=4*v_3*1j*(lambda1-lambda1.conjugate())*np.exp(3*xi1+xi1.conjugate()+eta3)*np.cosh(xi1+xi1.conjugate()+eta3)/(2*v_2*np.exp(3*(xi1+xi1.conjugate())+eta2)*np.cosh(xi1+xi1.conjugate()+eta2)+gamma1)
 
-    
+
     result1= q1.real
     result2= -q1.imag
     result3= q2.real
