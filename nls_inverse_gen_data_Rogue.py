@@ -7,10 +7,6 @@ n=200
 lines= []
 file=open('Rogue_data_x_new.csv', 'w')
 file.write("x,t,r1,r2,r3,r4\n")
-a=0
-b=1
-theta=0
-delta=0
 T=lhs(1,samples=n)*4-2
 X=lhs(1,samples=n)*16-8
 for v in range(n):
